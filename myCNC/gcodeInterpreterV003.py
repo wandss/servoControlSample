@@ -1,6 +1,7 @@
 from math import sqrt
 from Bipolar_Stepper_Motor_Class import Bipolar_Stepper_Motor
 from numpy import arccos, pi, sin, cos
+from ServoMotor import Servo
 import time
 
 #ark = open('square_0005.ngc')
@@ -36,6 +37,9 @@ speed = 0
 max_precision= 0.075
 motorX = Bipolar_Stepper_Motor(35, 36, 37, 38)
 motorY = Bipolar_Stepper_Motor(11, 12, 13, 15)
+servo_motor = Servo()
+servo_motor.sweep()
+# TODO:REMOVE THE sweep method call above
 
 
 def getCoordinates(line):
@@ -95,62 +99,66 @@ def getTotalSteps(x, y):
 def runMotor(motorX, x, direction_x, step_x, motorY,
              y, direction_y, step_y, total_steps, speed):
 
+    laps = True
+    #print speed
 
-        laps = True
-        #print speed
-
-        #if speed == 1:
-        #    laps = False
-        #
-        speed *= 10
-        print speed
-
+    #if speed == 1:
+    #    laps = False
+    #
+    speed *= 10
+    print(speed)
 
 
+    total_time = sqrt(x**2 + y**2)/speed
+    #print total_time
+    #print total_steps
+    #print x
+    #print y
+    #print step_x
+    #print step_y
+    #print speed
+    #print total_time
 
+    if total_time != 0:
+        delay = total_time/total_steps
+        #print delay
+        for i in range(1, total_steps +1):
+            time_laps = 0
 
-        total_time = sqrt(x**2 + y**2)/speed
-        #print total_time
-        #print total_steps
-        #print x
-        #print y
-        #print step_x
-        #print step_y
-        #print speed
-        #print total_time
+            if  i % step_x == 0:
+                motorX.move(direction_x, 1, delay/4.0)
+                time_laps += delay/4.0
 
-        if total_time != 0:
-            delay = total_time/total_steps
-            #print delay
-            for i in range(1, total_steps +1):
-                time_laps = 0
+            if i % step_y == 0:
+                motorY.move(direction_y, 1, delay/4.0)
+                time_laps += delay/4.0
 
-                if  i % step_x == 0:
-                    motorX.move(direction_x, 1, delay/4.0)
-                    time_laps += delay/4.0
-
-                if i % step_y == 0:
-                    motorY.move(direction_y, 1, delay/4.0)
-                    time_laps += delay/4.0
-
-                #if laps:
-                #    print 'OK'
-                #    print delay - time_laps
-                #print (delay - time_laps) /2
-                #print time_laps
-                    #time.sleep(0.0001)
-                time.sleep((delay - time_laps)/1000000)
+            #if laps:
+            #    print 'OK'
+            #    print delay - time_laps
+            #print (delay - time_laps) /2
+            #print time_laps
+                #time.sleep(0.0001)
+            time.sleep((delay - time_laps)/1000000)
 
 for line in code:
     #if 'M5' in line:
     #    break
     if 'M3' in line:
-        print "starting program"
+        print("starting program")
     if 'G21' in line:
-        print "Using 'mm' as measure unity"
+        print("Using 'mm' as measure unity")
     if 'G20' in line:
-        print "Using 'inch' as measure unity"
+        print("Using 'inch' as measure unity")
         max_precision *= 0.039370
+
+    if 'Z5' in line and not servo_motor.isAtStart:
+        """Moves z axis up"""
+        servo_motor.toggle()
+    if 'Z-' in line and servo_motor.istAtStart:
+        """Moves z axis down"""
+        servo_motor.toggle()
+
     if 'G' and ' X' and 'Y' in line:
         if 'G00' in line:
             x_pos, y_pos = getCoordinates(line)
@@ -214,16 +222,4 @@ for line in code:
 
 motorX.unhold()
 motorY.unhold()
-
-
-
-
-
-
-
-
-
-
-
-
-
+servo_motor.clean()

@@ -40,7 +40,7 @@ class Bipolar_Stepper_Motor:
         GPIO.setup(self.a2,GPIO.OUT);
         GPIO.setup(self.b1,GPIO.OUT);
         GPIO.setup(self.b2,GPIO.OUT);
-        print "Stepper Configured"
+        print("Stepper Configured")
 
         self.phase=0;
         self.dirction=0;
